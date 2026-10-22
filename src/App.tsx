@@ -10,7 +10,6 @@ function App() {
   const { data, isPending, isError, error, isPlaceholderData } = useQuery({
     queryKey: ["meals", debouncedTerm],
     queryFn: ({ signal }) => searchMeals(debouncedTerm, signal),
-    enabled: debouncedTerm.trim().length > 0,
     placeholderData: keepPreviousData,
   });
 
@@ -25,10 +24,14 @@ function App() {
         placeholder="Найди блюдо: chicken, soup, pasta…"
       />
       {isPlaceholderData && (
-        <p className="mt-2 text-sm text-orange-500 animate-pulse">Обновляем...</p>
+        <p className="mt-2 text-sm text-orange-500 animate-pulse">
+          Обновляем...
+        </p>
       )}
 
-      {isPending && !isPlaceholderData && <p className="mt-4 text-gray-500">Ищем…</p>}
+      {isPending && !isPlaceholderData && (
+        <p className="mt-4 text-gray-500">Ищем…</p>
+      )}
 
       {isError && <p className="mt-4 text-red-500">Ошибка: {error.message}</p>}
 
@@ -38,7 +41,9 @@ function App() {
             <li key={m.idMeal} className="rounded-lg bg-white p-2 shadow">
               <img src={m.strMealThumb} alt={m.strMeal} className="rounded" />
               <p className="mt-2 text-sm font-medium">{m.strMeal}</p>
-              <p className="text-xs text-gray-500">{m.strArea} · {m.strCategory}</p>
+              <p className="text-xs text-gray-500">
+                {m.strArea} · {m.strCategory}
+              </p>
             </li>
           ))}
         </ul>
