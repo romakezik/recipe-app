@@ -5,6 +5,19 @@ export interface Meal {
   strCategory: string;
   strArea: string;
   strInstructions: string;
+  ingredients: string[];
+}
+
+export function toMeal(raw: Record<string, string | null>): Meal {
+  return {
+    idMeal: raw.idMeal || "",
+    strMeal: raw.strMeal || "",
+    strMealThumb: raw.strMealThumb || "",
+    strCategory: raw.strCategory || "",
+    strArea: raw.strArea || "",
+    strInstructions: raw.strInstructions || "",
+    ingredients: toIngredients(raw),
+  };
 }
 
 export function toIngredients(meal: Record<string, string | null>): string[] {

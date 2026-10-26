@@ -2,10 +2,12 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useState } from "react";
 import { searchMeals } from "./lib/api";
 import { useDebouncedValue } from "./hooks/useDebouncedValue";
+import MealModal from "./components/MealModal";
 
 function App() {
   const [term, setTerm] = useState("");
   const debouncedTerm = useDebouncedValue(term, 300);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { data, isPending, isError, error, isPlaceholderData } = useQuery({
     queryKey: ["meals", debouncedTerm],
@@ -38,7 +40,11 @@ function App() {
       {data && (
         <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {data.map((m) => (
-            <li key={m.idMeal} className="rounded-lg bg-white p-2 shadow">
+            <li
+              key={m.idMeal}
+              onClick={() => setSelectedId(m.idMeal)}
+              className="cursor-pointer rounded-lg bg-white p-2 shadow"
+            >
               <img src={m.strMealThumb} alt={m.strMeal} className="rounded" />
               <p className="mt-2 text-sm font-medium">{m.strMeal}</p>
               <p className="text-xs text-gray-500">
@@ -47,6 +53,9 @@ function App() {
             </li>
           ))}
         </ul>
+      )}
+      {selectedId && (
+        <MealModal id={selectedId} onClose={() => setSelectedId(null)} />
       )}
     </div>
   );
