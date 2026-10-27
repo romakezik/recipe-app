@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getMealById } from "../lib/api";
 import { useEffect } from "react";
+import { useFavorites } from "../store/useFavoritesStore";
 
 interface Props {
   id: string;
@@ -17,6 +18,9 @@ export default function MealModal({ id, onClose }: Props) {
     queryFn: ({ signal }) => getMealById(id, signal),
     staleTime: 1000 * 60 * 5,
   });
+
+  const toggle = useFavorites((s) => s.toggle);
+  const isFavorite = useFavorites((s) => s.ids.includes(id));
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -42,6 +46,7 @@ export default function MealModal({ id, onClose }: Props) {
   }
 
   const { ingredients } = meal;
+
   return (
     <div
       onClick={onClose}
@@ -51,6 +56,18 @@ export default function MealModal({ id, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
         className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl p-6 relative shadow-xl"
       >
+        <button
+          onClick={() => toggle(meal.idMeal)}
+          aria-pressed={isFavorite}
+          aria-label={isFavorite ? "Убрать из избранного" : "В избранное"}
+          className={`absolute top-4 right-12 font-bold cursor-pointer transition-colors ${
+            isFavorite
+              ? "text-red-500 hover:text-black"
+              : "text-gray-500 hover:text-black"
+          }`}
+        >
+          {isFavorite ? "\u2665" : "\u2661"}
+        </button>
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-black font-bold cursor-pointer"
