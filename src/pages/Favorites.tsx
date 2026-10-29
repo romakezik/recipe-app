@@ -21,9 +21,11 @@ export default function Favorites() {
 
   const isLoading = queries.some((q) => q.isPending);
 
+  const isAnyError = queries.some((q) => q.isError);
+
   const meals = queries
     .map((q) => q.data)
-    .filter((m): m is NonNullable<typeof m> => m !== null);
+    .filter((m): m is NonNullable<typeof m> => m != null);
 
   if (ids.length === 0) {
     return (
@@ -49,6 +51,12 @@ export default function Favorites() {
   return (
     <div className="mx-auto max-w-3xl p-6">
       <h2 className="text-2xl font-bold mb-4 text-blue-500">Ваше избранное</h2>
+
+      {isAnyError && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+          Некоторые рецепты не удалось загрузить. Проверьте интернет и обновите страницу.
+        </div>
+      )}
 
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {meals.map((m) => (
