@@ -15,6 +15,7 @@ function Home() {
     queryKey: ["meals", debouncedTerm],
     queryFn: ({ signal }) => searchMeals(debouncedTerm, signal),
     placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 5,
   });
 
   const ids = useFavorites((s) => s.ids);

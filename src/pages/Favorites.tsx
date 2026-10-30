@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { Link } from "react-router";
-import { getMealById } from "../lib/api";
+import { mealQueryOptions } from "../hooks/useMeal";
 import { useFavorites } from "../store/useFavoritesStore";
 import MealModal from "../components/MealModal";
 import { MealCard } from "../components/MealCard";
@@ -12,11 +12,7 @@ export default function Favorites() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const queries = useQueries({
-    queries: ids.map((id) => ({
-      queryKey: ["meal", id],
-      queryFn: ({ signal }) => getMealById(id, signal),
-      staleTime: 1000 * 60 * 5,
-    })),
+    queries: ids.map(mealQueryOptions),
   });
 
   const isLoading = queries.some((q) => q.isPending);

@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { getMealById } from "../lib/api";
 import { useEffect } from "react";
 import { useFavorites } from "../store/useFavoritesStore";
+import { useMeal } from "../hooks/useMeal";
+import { useHistory } from "../store/useHistoryStore";
 
 interface Props {
   id: string;
@@ -9,18 +9,18 @@ interface Props {
 }
 
 export default function MealModal({ id, onClose }: Props) {
-  const {
-    data: meal,
-    isPending,
-    isError,
-  } = useQuery({
-    queryKey: ["meal", id],
-    queryFn: ({ signal }) => getMealById(id, signal),
-    staleTime: 1000 * 60 * 5,
-  });
+  const { data: meal, isPending, isError } = useMeal(id);
 
   const toggle = useFavorites((s) => s.toggle);
   const isFavorite = useFavorites((s) => s.ids.includes(id));
+
+  const addToHistory = useHistory((s) => s.add);
+
+  useEffect(() => {
+    if (meal) {
+      addToHistory(meal.idMeal);
+    }
+  }, [meal, addToHistory]);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
