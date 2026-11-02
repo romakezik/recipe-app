@@ -1,25 +1,15 @@
 import { useState } from "react";
-import { useQueries } from "@tanstack/react-query";
 import { Link } from "react-router";
 import { useHistory } from "../store/useHistoryStore";
 import MealModal from "../components/MealModal";
 import { MealCard } from "../components/MealCard";
-import { mealQueryOptions } from "../hooks/useMeal";
+import { useMeals } from "../hooks/useMeals";
 
 export default function History() {
   const historyIds = useHistory((s) => s.historyIds);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const queries = useQueries({
-    queries: historyIds.map(mealQueryOptions),
-  });
-
-  const isLoading = queries.some((q) => q.isPending);
-  const isAnyError = queries.some((q) => q.isError);
-
-  const meals = queries
-    .map((q) => q.data)
-    .filter((m): m is NonNullable<typeof m> => m != null);
+  const { meals, isLoading, isAnyError } = useMeals(historyIds);
 
   if (historyIds.length === 0) {
     return (
