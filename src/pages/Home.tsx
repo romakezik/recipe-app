@@ -47,6 +47,12 @@ function Home() {
 
       {isError && <p className="mt-4 text-red-500">Ошибка: {error.message}</p>}
 
+      {data && data.length === 0 && !isPending && (
+        <p className="mt-4 text-gray-500 text-center font-medium">
+          Ничего не найдено. Попробуйте изменить запрос.
+        </p>
+      )}
+
       {data && (
         <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {data.map((m) => {
