@@ -28,8 +28,26 @@ describe("useDebouncedValue", () => {
     expect(result.current).toBe("a");
 
     act(() => {
-      vi.advanceTimersByTime(2);
+      vi.advanceTimersByTime(1);
     });
     expect(result.current).toBe("ab");
+  });
+
+  it("сбрасывает таймер при новом изменении (restart)", () => {
+    const { result, rerender } = renderHook(
+      ({ value }) => useDebouncedValue(value, 300),
+      { initialProps: { value: "a" } },
+    );
+
+    rerender({ value: "ab" });
+    act(() => vi.advanceTimersByTime(100));
+
+    rerender({ value: "abc" });
+    act(() => vi.advanceTimersByTime(299));
+
+    expect(result.current).toBe("a");
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(result.current).toBe("abc");
   });
 });
