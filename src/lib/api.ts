@@ -29,3 +29,33 @@ export async function getMealById(
   const data = await res.json();
   return data.meals?.[0] ? toMeal(data.meals[0]) : null;
 }
+
+export async function getMealByCategory(
+  category: string,
+  signal?: AbortSignal,
+): Promise<Meal[]> {
+  const res = await fetch(
+    `${BASE}/filter.php?c=${encodeURIComponent(category)}`,
+    {
+      signal,
+    },
+  );
+
+  if (!res.ok) throw new Error(`Ошибка ${res.status}`);
+  const data = await res.json();
+
+  return data.meals ? data.meals.map(toMeal) : [];
+}
+
+export async function getCategories(signal?: AbortSignal): Promise<string[]> {
+  const res = await fetch(`${BASE}/categories.php`, {
+    signal,
+  });
+
+  if (!res.ok) throw new Error(`Ошибка ${res.status}`);
+  const data = await res.json();
+
+  return data.categories
+    ? data.categories.map((c: { strCategory: string }) => c.strCategory)
+    : [];
+}
