@@ -28,8 +28,6 @@ function Home() {
         ? getMealByCategory(selectedCategory, signal)
         : searchMeals(debouncedTerm, signal),
 
-    enabled: !!selectedCategory || debouncedTerm.trim().length > 0,
-
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 5,
   });
@@ -90,11 +88,14 @@ function Home() {
 
       {isError && <p className="mt-4 text-red-500">Ошибка: {error.message}</p>}
 
-      {data && data.length === 0 && !isPlaceholderData && (
-        <p className="mt-4 text-gray-500 text-center font-medium">
-          Ничего не найдено. Попробуйте изменить запрос.
-        </p>
-      )}
+      {data &&
+        data.length === 0 &&
+        !isPlaceholderData &&
+        (debouncedTerm.trim() !== "" || selectedCategory) && (
+          <p className="mt-4 text-gray-500 text-center font-medium">
+            Ничего не найдено. Попробуйте изменить запрос.
+          </p>
+        )}
 
       {data && (
         <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
