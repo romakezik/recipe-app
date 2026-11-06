@@ -19,6 +19,8 @@ coverage
 .env.local
 .env.*.local
 *.local
+.env.keys
+
 
 # Editor directories and files
 .vscode/*
@@ -33,3 +35,7 @@ coverage
 
 # Local Netlify folder
 .netlify
+
+# Supabase
+.branches
+.temp
