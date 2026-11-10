@@ -1,10 +1,16 @@
-import { Routes, Route, Link } from "react-router";
-import Home from "./pages/Home";
-import History from "./pages/History";
+import { useAuth } from "./hooks/useAuth";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import MyRecipes from "./pages/MyRecipes";
+import PrivateRoute from "./components/PrivateRoute";
+import { Link, Route, Routes } from "react-router";
 import Favorites from "./pages/Favorites";
+import Home from "./pages/Home";
 import { useFavorites } from "./store/useFavoritesStore";
+import HistoryPage from "./pages/History";
 
-function App() {
+export default function App() {
+  const { user } = useAuth();
   const count = useFavorites((s) => s.ids.length);
 
   return (
@@ -22,14 +28,28 @@ function App() {
         <Link to="/history" className="text-blue-500 hover:underline font-bold">
           История
         </Link>
+
+        {user && (
+          <Link
+            to="/my-recipes"
+            className="text-blue-500 hover:underline font-bold ml-auto"
+          >
+            Мои рецепты
+          </Link>
+        )}
       </nav>
 
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/favorites" element={<Favorites />} />
-        <Route path="/history" element={<History />} />
+        <Route path="/history" element={<HistoryPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        <Route element={<PrivateRoute />}>
+          <Route path="/my-recipes" element={<MyRecipes />} />
+        </Route>
       </Routes>
     </div>
   );
 }
-export default App;

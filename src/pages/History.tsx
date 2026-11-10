@@ -5,7 +5,7 @@ import MealModal from "../components/MealModal";
 import { MealCard } from "../components/MealCard";
 import { useMeals } from "../hooks/useMeals";
 
-export default function History() {
+export default function HistoryPage() {
   const historyIds = useHistory((s) => s.historyIds);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
