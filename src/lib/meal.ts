@@ -1,3 +1,7 @@
+import type { Database } from "../types/database.types";
+
+type RecipeRow = Database["public"]["Tables"]["recipes"]["Row"];
+
 export interface Meal {
   idMeal: string;
   strMeal: string;
@@ -24,4 +28,16 @@ export function toIngredients(meal: Record<string, string | null>): string[] {
   return Array.from({ length: 20 }, (_, i) => meal[`strIngredient${i + 1}`])
     .map((s) => (s ?? "").trim())
     .filter(Boolean);
+}
+
+export function toOwnMeal(row: RecipeRow): Meal {
+  return {
+    idMeal: row.id,
+    strMeal: row.title,
+    strCategory: row.category,
+    strArea: "Custom",
+    strInstructions: row.instructions,
+    ingredients: row.ingredients,
+    strMealThumb: "https://placehold.co/600x400?text=No+Image",
+  };
 }
