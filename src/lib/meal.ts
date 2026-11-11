@@ -5,7 +5,7 @@ type RecipeRow = Database["public"]["Tables"]["recipes"]["Row"];
 export interface Meal {
   idMeal: string;
   strMeal: string;
-  strMealThumb: string;
+  strMealThumb: string | null;
   strCategory: string;
   strArea: string;
   strInstructions: string;
@@ -38,6 +38,6 @@ export function toOwnMeal(row: RecipeRow): Meal {
     strArea: "Custom",
     strInstructions: row.instructions,
     ingredients: row.ingredients,
-    strMealThumb: "https://placehold.co/600x400?text=No+Image",
+    strMealThumb: null,
   };
 }

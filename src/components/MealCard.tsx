@@ -16,7 +16,7 @@ export function MealCard({ meal, onOpen, actionButton }: Props) {
         className="block w-full p-2 text-left rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
       >
         <img
-          src={meal.strMealThumb}
+          src={meal.strMealThumb || "https://placehold.co/600x400?text=No+Image"}
           alt={meal.strMeal}
           className="rounded"
           loading="lazy"
