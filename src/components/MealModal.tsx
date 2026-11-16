@@ -77,7 +77,9 @@ export default function MealModal({ id, onClose }: Props) {
 
         <h2 className="text-2xl font-bold mb-4">{meal.strMeal}</h2>
         <img
-          src={meal.strMealThumb}
+          src={
+            meal.strMealThumb || "https://placehold.co/600x400?text=No+Image"
+          }
           alt={meal.strMeal}
           className="w-full h-64 object-cover rounded-lg mb-6"
         />

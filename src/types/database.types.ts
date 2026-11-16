@@ -31,7 +31,7 @@ export type Database = {
           ingredients: string[];
           instructions: string;
           title: string;
-          user_id: string;
+          user_id?: string;
         };
         Update: {
           category?: string;
