@@ -6,17 +6,27 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
   const navigate = useNavigate();
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.SubmitEvent) => {
     e.preventDefault();
+    setPending(true);
     setError("");
-    const { error } = await supabase.auth.signUp({ email, password });
 
-    if (error) {
-      setError(error.message);
-    } else {
+    try {
+      const { error } = await supabase.auth.signUp({ email, password });
+
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
       navigate("/my-recipes");
+    } catch {
+      setError("Произошла ошибка сети. Попробуйте ещё раз.");
+    } finally {
+      setPending(false);
     }
   };
 
@@ -43,6 +53,7 @@ export default function Register() {
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <button
           type="submit"
+          disabled={pending}
           className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
         >
           Зарегистрироваться
