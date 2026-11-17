@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { useHistory } from "../store/useHistoryStore";
-import MealModal from "../components/MealModal";
+import MealModalLoader from "../components/MealModalLoader";
 import { MealCard } from "../components/MealCard";
 import { useMeals } from "../hooks/useMeals";
 
@@ -57,7 +57,7 @@ export default function HistoryPage() {
         ))}
       </ul>
       {selectedId && (
-        <MealModal id={selectedId} onClose={() => setSelectedId(null)} />
+        <MealModalLoader id={selectedId} onClose={() => setSelectedId(null)} />
       )}
     </div>
   );

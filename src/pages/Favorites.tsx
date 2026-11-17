@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { useFavorites } from "../store/useFavoritesStore";
-import MealModal from "../components/MealModal";
+import MealModalLoader from "../components/MealModalLoader";
 import { MealCard } from "../components/MealCard";
 import { useMeals } from "../hooks/useMeals";
 
@@ -63,7 +63,7 @@ export default function Favorites() {
         ))}
       </ul>
       {selectedId && (
-        <MealModal id={selectedId} onClose={() => setSelectedId(null)} />
+        <MealModalLoader id={selectedId} onClose={() => setSelectedId(null)} />
       )}
     </div>
   );

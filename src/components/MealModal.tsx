@@ -1,106 +1,55 @@
-import { useEffect } from "react";
-import { useFavorites } from "../store/useFavoritesStore";
-import { useMeal } from "../hooks/useMeal";
-import { useHistory } from "../store/useHistoryStore";
+import { type ReactNode } from "react";
+import { MEAL_PLACEHOLDER, type Meal } from "../lib/meal";
+import ModalShell from "./ModalShell";
 
 interface Props {
-  id: string;
+  meal: Meal;
   onClose: () => void;
+  actionButton?: ReactNode;
 }
 
-export default function MealModal({ id, onClose }: Props) {
-  const { data: meal, isPending, isError } = useMeal(id);
-
-  const toggle = useFavorites((s) => s.toggle);
-  const isFavorite = useFavorites((s) => s.ids.includes(id));
-
-  const addToHistory = useHistory((s) => s.add);
-
-  useEffect(() => {
-    if (meal) {
-      addToHistory(meal.idMeal);
-    }
-  }, [meal, addToHistory]);
-
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
-
-  if (isPending) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white p-6 rounded-xl">Загрузка...</div>
-      </div>
-    );
-  }
-  if (isError || !meal) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white p-6 rounded-xl text-red-500">Ошибка</div>
-      </div>
-    );
-  }
-
-  const { ingredients } = meal;
+export default function MealModal({ meal, onClose, actionButton }: Props) {
+  const titleId = `meal-title-${meal.idMeal}`;
 
   return (
-    <div
-      onClick={onClose}
-      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+    <ModalShell
+      onClose={onClose}
+      labelledBy={titleId}
+      className="max-h-[90vh] w-full max-w-2xl overflow-y-auto p-6"
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl p-6 relative shadow-xl"
-      >
-        <button
-          onClick={() => toggle(meal.idMeal)}
-          aria-pressed={isFavorite}
-          aria-label={isFavorite ? "Убрать из избранного" : "В избранное"}
-          className={`absolute top-4 right-12 font-bold cursor-pointer transition-colors ${
-            isFavorite
-              ? "text-red-500 hover:text-black"
-              : "text-gray-500 hover:text-black"
-          }`}
-        >
-          {isFavorite ? "\u2665" : "\u2661"}
-        </button>
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-black font-bold cursor-pointer"
-        >
-          ✕
-        </button>
+      {actionButton}
 
-        <h2 className="text-2xl font-bold mb-4">{meal.strMeal}</h2>
-        <img
-          src={
-            meal.strMealThumb || "https://placehold.co/600x400?text=No+Image"
-          }
-          alt={meal.strMeal}
-          className="w-full h-64 object-cover rounded-lg mb-6"
-        />
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Ингредиенты:</h3>
-            <ul className="list-disc pl-5 space-y-1 text-gray-700">
-              {ingredients.map((ing, i) => (
+      <h2 id={titleId} className="mb-4 pr-16 text-2xl font-bold">
+        {meal.strMeal}
+      </h2>
+
+      <img
+        src={meal.strMealThumb || MEAL_PLACEHOLDER}
+        alt={meal.strMeal}
+        className="mb-6 h-64 w-full rounded-lg object-cover"
+      />
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <div>
+          <h3 className="mb-2 text-lg font-semibold">Ингредиенты:</h3>
+          {meal.ingredients.length === 0 ? (
+            <p className="text-sm text-gray-500">Ингредиенты не указаны.</p>
+          ) : (
+            <ul className="list-disc space-y-1 pl-5 text-gray-700">
+              {meal.ingredients.map((ing, i) => (
                 <li key={i}>{ing}</li>
               ))}
             </ul>
-          </div>
+          )}
+        </div>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Инструкция:</h3>
-            <p className="text-gray-700 text-sm whitespace-pre-line">
-              {meal.strInstructions}
-            </p>
-          </div>
+        <div>
+          <h3 className="mb-2 text-lg font-semibold">Инструкция:</h3>
+          <p className="whitespace-pre-line text-sm text-gray-700">
+            {meal.strInstructions || "Инструкция не указана."}
+          </p>
         </div>
       </div>
-    </div>
+    </ModalShell>
   );
 }

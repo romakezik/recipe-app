@@ -2,7 +2,7 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useState } from "react";
 import { searchMeals, getMealByCategory, getCategories } from "../lib/api";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
-import MealModal from "../components/MealModal";
+import MealModalLoader from "../components/MealModalLoader";
 import { useFavorites } from "../store/useFavoritesStore";
 import { MealCard } from "../components/MealCard";
 
@@ -127,7 +127,7 @@ function Home() {
         </ul>
       )}
       {selectedId && (
-        <MealModal id={selectedId} onClose={() => setSelectedId(null)} />
+        <MealModalLoader id={selectedId} onClose={() => setSelectedId(null)} />
       )}
     </div>
   );
