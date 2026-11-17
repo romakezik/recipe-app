@@ -59,4 +59,9 @@ describe("toMeal", () => {
     const result = toMeal({ idMeal: "1" });
     expect(result.ingredients).toEqual([]);
   });
+
+  it("картинка: null, а не пустая строка", () => {
+    expect(toMeal({ idMeal: "1" }).strMealThumb).toBeNull();
+    expect(toMeal({ idMeal: "1", strMealThumb: null }).strMealThumb).toBeNull();
+  });
 });

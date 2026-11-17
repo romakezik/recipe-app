@@ -2,6 +2,8 @@ import type { Database } from "../types/database.types";
 
 type RecipeRow = Database["public"]["Tables"]["recipes"]["Row"];
 
+export const MEAL_PLACEHOLDER = "https://placehold.co/600x400?text=No+Image";
+
 export interface Meal {
   idMeal: string;
   strMeal: string;
@@ -16,7 +18,7 @@ export function toMeal(raw: Record<string, string | null>): Meal {
   return {
     idMeal: raw.idMeal || "",
     strMeal: raw.strMeal || "",
-    strMealThumb: raw.strMealThumb || "",
+    strMealThumb: raw.strMealThumb ?? null,
     strCategory: raw.strCategory || "",
     strArea: raw.strArea || "",
     strInstructions: raw.strInstructions || "",

@@ -1,4 +1,4 @@
-import type { Meal } from "../lib/meal";
+import { MEAL_PLACEHOLDER, type Meal } from "../lib/meal";
 import type { ReactNode } from "react";
 
 interface Props {
@@ -16,9 +16,7 @@ export function MealCard({ meal, onOpen, actionButton }: Props) {
         className="block w-full p-2 text-left rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
       >
         <img
-          src={
-            meal.strMealThumb || "https://placehold.co/600x400?text=No+Image"
-          }
+          src={meal.strMealThumb || MEAL_PLACEHOLDER}
           alt={meal.strMeal}
           className="rounded"
           loading="lazy"
