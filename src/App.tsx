@@ -8,6 +8,7 @@ import Favorites from "./pages/Favorites";
 import Home from "./pages/Home";
 import { useFavorites } from "./store/useFavoritesStore";
 import HistoryPage from "./pages/History";
+import NewRecipe from "./pages/NewRecipe";
 
 export default function App() {
   const { user } = useAuth();
@@ -48,6 +49,7 @@ export default function App() {
 
         <Route element={<PrivateRoute />}>
           <Route path="/my-recipes" element={<MyRecipes />} />
+          <Route path="/my-recipes/new" element={<NewRecipe />} />
         </Route>
       </Routes>
     </div>
