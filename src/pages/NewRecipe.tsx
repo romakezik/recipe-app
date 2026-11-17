@@ -1,6 +1,12 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { recipeSchema, type RecipeFormValues } from "../lib/recipeSchema";
+import {
+  CATEGORIES,
+  CATEGORY_LABELS,
+  parseIngredients,
+  recipeSchema,
+  type RecipeFormValues,
+} from "../lib/recipeSchema";
 import { supabase } from "../lib/supabase";
 import { useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,10 +25,7 @@ export default function NewRecipe() {
 
   const mutation = useMutation({
     mutationFn: async (data: RecipeFormValues) => {
-      const parsedIngredients = data.ingredients
-        .split("\n")
-        .map((i) => i.trim())
-        .filter(Boolean);
+      const parsedIngredients = parseIngredients(data.ingredients);
 
       const { error } = await supabase.from("recipes").insert({
         title: data.title,
@@ -63,10 +66,11 @@ export default function NewRecipe() {
             className="w-full p-2 border rounded"
           >
             <option value="">Выберите...</option>
-            <option value="Chicken">Курица</option>
-            <option value="Beef">Говядина</option>
-            <option value="Dessert">Десерт</option>
-            <option value="Vegetarian">Вегетарианское</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {CATEGORY_LABELS[c]}
+              </option>
+            ))}
           </select>
           {errors.category && (
             <p className="text-red-500 text-sm">{errors.category.message}</p>
