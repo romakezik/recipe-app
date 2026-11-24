@@ -3,6 +3,7 @@ import { Link, NavLink, Route, Routes, useNavigate } from "react-router";
 import { useAuth } from "./hooks/useAuth";
 import { useFavorites } from "./store/useFavoritesStore";
 import PrivateRoute from "./components/PrivateRoute";
+import NotFound from "./components/NotFound";
 import Home from "./pages/Home";
 import Favorites from "./pages/Favorites";
 import HistoryPage from "./pages/History";
@@ -17,18 +18,29 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function App() {
-  const { user, signOut } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const count = useFavorites((s) => s.ids.length);
   const navigate = useNavigate();
   const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState("");
 
   const handleSignOut = async () => {
     setSigningOut(true);
+    setSignOutError("");
+
     const ok = await signOut()
       .then(() => true)
       .catch(() => false);
+
     setSigningOut(false);
-    if (ok) navigate("/");
+
+    if (ok) {
+      navigate("/");
+    } else {
+      setSignOutError(
+        "Не удалось выйти. Проверьте соединение и попробуйте ещё раз.",
+      );
+    }
   };
 
   return (
@@ -45,7 +57,12 @@ export default function App() {
         </NavLink>
 
         <div className="ml-auto flex flex-wrap items-center gap-4">
-          {user ? (
+          {loading ? (
+            <span
+              aria-hidden="true"
+              className="h-5 w-40 animate-pulse rounded bg-gray-300"
+            />
+          ) : user ? (
             <>
               <NavLink to="/my-recipes" className={navLinkClass}>
                 Мои рецепты
@@ -75,6 +92,22 @@ export default function App() {
         </div>
       </nav>
 
+      {signOutError && (
+        <div
+          role="alert"
+          className="flex items-start gap-3 bg-red-100 px-4 py-2 text-sm text-red-700"
+        >
+          <span>{signOutError}</span>
+          <button
+            type="button"
+            onClick={() => setSignOutError("")}
+            className="ml-auto cursor-pointer font-bold hover:underline"
+          >
+            Скрыть
+          </button>
+        </div>
+      )}
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/favorites" element={<Favorites />} />
@@ -86,6 +119,8 @@ export default function App() {
           <Route path="/my-recipes" element={<MyRecipes />} />
           <Route path="/my-recipes/new" element={<NewRecipe />} />
         </Route>
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
