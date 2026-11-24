@@ -1,51 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../lib/supabase";
-import { toOwnMeal } from "../lib/meal";
 import { MealCard } from "../components/MealCard";
 import MealModal from "../components/MealModal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useAuth } from "../hooks/useAuth";
+import { useDeleteRecipe, useMyRecipes } from "../hooks/useMyRecipes";
 
 export default function MyRecipes() {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
+  const { data: meals, isPending, isError, error } = useMyRecipes(user?.id);
+  const remove = useDeleteRecipe();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
-
-  const {
-    data: recipes,
-    isPending,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["my-recipes", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("recipes")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw new Error(error.message);
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("recipes").delete().eq("id", id);
-      if (error) throw new Error(error.message);
-      return id;
-    },
-    onSuccess: (id) => {
-      setConfirmId(null);
-      setSelectedId((current) => (current === id ? null : current));
-      queryClient.invalidateQueries({ queryKey: ["my-recipes"] });
-    },
-  });
 
   if (isPending) {
     return (
@@ -61,9 +28,20 @@ export default function MyRecipes() {
     );
   }
 
-  const meals = recipes.map(toOwnMeal);
   const selected = meals.find((m) => m.idMeal === selectedId) ?? null;
   const confirmTarget = meals.find((m) => m.idMeal === confirmId) ?? null;
+
+  const handleConfirmDelete = () => {
+    if (!confirmTarget) return;
+    const id = confirmTarget.idMeal;
+
+    remove.mutate(id, {
+      onSuccess: () => {
+        setConfirmId(null);
+        setSelectedId((current) => (current === id ? null : current));
+      },
+    });
+  };
 
   return (
     <div className="mx-auto max-w-3xl p-6">
@@ -129,7 +107,7 @@ export default function MyRecipes() {
           description={`«${confirmTarget.strMeal}» будет удалён безвозвратно.`}
           confirmLabel={remove.isPending ? "Удаляем..." : "Удалить"}
           pending={remove.isPending}
-          onConfirm={() => remove.mutate(confirmTarget.idMeal)}
+          onConfirm={handleConfirmDelete}
           onCancel={() => setConfirmId(null)}
         />
       )}

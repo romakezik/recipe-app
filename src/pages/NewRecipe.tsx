@@ -1,19 +1,17 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router";
 import {
   CATEGORIES,
   CATEGORY_LABELS,
-  parseIngredients,
   recipeSchema,
   type RecipeFormValues,
 } from "../lib/recipeSchema";
-import { supabase } from "../lib/supabase";
-import { useNavigate } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCreateRecipe } from "../hooks/useMyRecipes";
 
 export default function NewRecipe() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const mutation = useCreateRecipe();
 
   const {
     register,
@@ -23,27 +21,10 @@ export default function NewRecipe() {
     resolver: zodResolver(recipeSchema),
   });
 
-  const mutation = useMutation({
-    mutationFn: async (data: RecipeFormValues) => {
-      const parsedIngredients = parseIngredients(data.ingredients);
-
-      const { error } = await supabase.from("recipes").insert({
-        title: data.title,
-        category: data.category,
-        ingredients: parsedIngredients,
-        instructions: data.instructions,
-      });
-
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["my-recipes"] });
-      navigate("/my-recipes");
-    },
-  });
-
   const onSubmit = (data: RecipeFormValues) => {
-    mutation.mutate(data);
+    mutation.mutate(data, {
+      onSuccess: () => navigate("/my-recipes"),
+    });
   };
 
   return (
