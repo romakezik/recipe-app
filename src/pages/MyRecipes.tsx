@@ -82,15 +82,24 @@ export default function MyRecipes() {
               meal={m}
               onOpen={setSelectedId}
               actionButton={
-                <button
-                  type="button"
-                  onClick={() => setConfirmId(m.idMeal)}
-                  disabled={remove.isPending}
-                  aria-label={`Удалить рецепт ${m.strMeal}`}
-                  className="absolute top-2 right-2 z-10 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-white/80 text-red-500 shadow transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  ✕
-                </button>
+                <div className="absolute top-2 right-2 z-10 flex gap-1">
+                  <Link
+                    to={`/my-recipes/${m.idMeal}/edit`}
+                    aria-label={`Редактировать рецепт ${m.strMeal}`}
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-blue-500 shadow transition-colors hover:bg-blue-50"
+                  >
+                    ✎
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmId(m.idMeal)}
+                    disabled={remove.isPending}
+                    aria-label={`Удалить рецепт ${m.strMeal}`}
+                    className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-white/80 text-red-500 shadow transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    ✕
+                  </button>
+                </div>
               }
             />
           ))}

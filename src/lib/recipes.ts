@@ -24,6 +24,23 @@ export async function createRecipe(input: RecipeFormValues): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function updateRecipe(
+  id: string,
+  input: RecipeFormValues,
+): Promise<void> {
+  const { error } = await supabase
+    .from("recipes")
+    .update({
+      title: input.title,
+      category: input.category,
+      ingredients: parseIngredients(input.ingredients),
+      instructions: input.instructions,
+    })
+    .eq("id", id);
+
+  if (error) throw new Error(error.message);
+}
+
 export async function deleteRecipe(id: string): Promise<string> {
   const { error } = await supabase.from("recipes").delete().eq("id", id);
 

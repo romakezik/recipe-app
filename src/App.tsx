@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MyRecipes from "./pages/MyRecipes";
 import NewRecipe from "./pages/NewRecipe";
+import EditRecipe from "./pages/EditRecipe";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `font-bold transition-colors ${
@@ -120,6 +121,7 @@ export default function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/my-recipes" element={<MyRecipes />} />
           <Route path="/my-recipes/new" element={<NewRecipe />} />
+          <Route path="/my-recipes/:id/edit" element={<EditRecipe />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

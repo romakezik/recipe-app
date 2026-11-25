@@ -1,4 +1,5 @@
 import type { Database } from "../types/database.types";
+import type { RecipeFormValues } from "./recipeSchema";
 
 type RecipeRow = Database["public"]["Tables"]["recipes"]["Row"];
 
@@ -41,5 +42,14 @@ export function toOwnMeal(row: RecipeRow): Meal {
     strInstructions: row.instructions,
     ingredients: row.ingredients,
     strMealThumb: null,
+  };
+}
+
+export function toRecipeFormValues(meal: Meal): RecipeFormValues {
+  return {
+    title: meal.strMeal,
+    category: meal.strCategory as RecipeFormValues["category"],
+    ingredients: meal.ingredients.join("\n"),
+    instructions: meal.strInstructions,
   };
 }

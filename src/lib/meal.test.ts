@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { toIngredients, toMeal } from "./meal";
+import { toIngredients, toMeal, toRecipeFormValues } from "./meal";
+import { parseIngredients } from "./recipeSchema";
 
 describe("toIngredients", () => {
   it("собирает полный список из 20 ингредиентов", () => {
@@ -63,5 +64,30 @@ describe("toMeal", () => {
   it("картинка: null, а не пустая строка", () => {
     expect(toMeal({ idMeal: "1" }).strMealThumb).toBeNull();
     expect(toMeal({ idMeal: "1", strMealThumb: null }).strMealThumb).toBeNull();
+  });
+});
+
+describe("toRecipeFormValues", () => {
+  const meal = {
+    idMeal: "abc",
+    strMeal: "Борщ",
+    strMealThumb: null,
+    strCategory: "Beef",
+    strArea: "Custom",
+    strInstructions: "Варить.",
+    ingredients: ["Свёкла", "Капуста"],
+  };
+
+  it("маппит все четыре поля формы", () => {
+    const values = toRecipeFormValues(meal);
+    expect(values.title).toBe("Борщ");
+    expect(values.category).toBe("Beef");
+    expect(values.instructions).toBe("Варить.");
+    expect(values.ingredients).toBe("Свёкла\nКапуста");
+  });
+
+  it("round-trip: ингредиенты переживают join → parse без потерь", () => {
+    const values = toRecipeFormValues(meal);
+    expect(parseIngredients(values.ingredients)).toEqual(meal.ingredients);
   });
 });
