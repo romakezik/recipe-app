@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, Route, Routes, useNavigate } from "react-router";
 import { useAuth } from "./hooks/useAuth";
-import { useFavorites } from "./store/useFavoritesStore";
+import { useFavorites } from "./hooks/useFavorites";
 import PrivateRoute from "./components/PrivateRoute";
 import NotFound from "./components/NotFound";
 import Home from "./pages/Home";
@@ -19,7 +19,7 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 export default function App() {
   const { user, loading, signOut } = useAuth();
-  const count = useFavorites((s) => s.ids.length);
+  const { ids, enabled } = useFavorites();
   const navigate = useNavigate();
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState("");
@@ -49,9 +49,11 @@ export default function App() {
         <NavLink to="/" className={navLinkClass} end>
           Поиск
         </NavLink>
-        <NavLink to="/favorites" className={navLinkClass}>
-          Избранное ({count})
-        </NavLink>
+        {enabled && (
+          <NavLink to="/favorites" className={navLinkClass}>
+            Избранное ({ids.length})
+          </NavLink>
+        )}
         <NavLink to="/history" className={navLinkClass}>
           История
         </NavLink>

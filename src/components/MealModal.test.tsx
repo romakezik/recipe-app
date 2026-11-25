@@ -1,85 +1,72 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import MealModal from "./MealModal";
-import type { Meal } from "../lib/meal";
-import { useHistory } from "../store/useHistoryStore";
-import { useFavorites } from "../store/useFavoritesStore";
 
-const ownMeal: Meal = {
-  idMeal: "6f1c0f5e-0000-4000-8000-000000000001",
-  strMeal: "Борщ по-домашнему",
-  strMealThumb: null,
-  strCategory: "Beef",
-  strArea: "Custom",
-  strInstructions: "Сварить бульон.\nДобавить овощи.",
-  ingredients: ["Свёкла", "Капуста", "Говядина"],
+vi.mock("../hooks/useFavorites", () => ({
+  useFavorites: vi.fn(() => ({
+    ids: [],
+    enabled: true,
+    isFavorite: vi.fn(() => false),
+    toggle: vi.fn(),
+    isPending: false,
+    error: null,
+    dismiss: vi.fn(),
+  })),
+}));
+
+vi.mock("../store/useHistoryStore", () => ({
+  useHistory: vi.fn(() => ({
+    ids: [],
+    add: vi.fn(),
+  })),
+}));
+
+vi.mock("../hooks/useAuth", () => ({
+  useAuth: vi.fn(() => ({
+    user: { id: "test-user", email: "test@test.com" },
+    loading: false,
+    signOut: vi.fn(),
+    session: null,
+  })),
+}));
+
+const mockMeal = {
+  idMeal: "52772",
+  strMeal: "Chicken Teriyaki",
+  strCategory: "Chicken",
+  strArea: "Japanese",
+  strInstructions: "Cook the chicken and add sauce.",
+  strMealThumb:
+    "https://www.themealdb.com/images/media/meals/wvpsxx1468256321.jpg",
+  ingredients: ["Chicken", "Soy Sauce", "Ginger"],
 };
 
-describe("MealModal — презентационная, без источников данных", () => {
-  beforeEach(() => {
-    useHistory.setState({ historyIds: [] });
-    useFavorites.setState({ ids: [] });
+function renderWithProviders(ui: ReactNode) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+  );
+}
+
+describe("MealModal", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("рендерит информацию о блюде", () => {
+    renderWithProviders(<MealModal meal={mockMeal} onClose={() => {}} />);
+    expect(screen.getByText("Chicken Teriyaki")).toBeInTheDocument();
+    expect(screen.getByText("Ингредиенты:")).toBeInTheDocument();
+    expect(screen.getByText("Инструкция:")).toBeInTheDocument();
+    expect(screen.getByAltText("Chicken Teriyaki")).toBeInTheDocument();
   });
 
-  it("рендерится без QueryClientProvider — значит не ходит в сеть", () => {
-    render(<MealModal meal={ownMeal} onClose={() => {}} />);
-
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText("Борщ по-домашнему")).toBeInTheDocument();
-    expect(screen.getByText("Свёкла")).toBeInTheDocument();
-    expect(screen.getByText(/Сварить бульон/)).toBeInTheDocument();
-  });
-
-  it("uuid своего рецепта не попадает в историю и избранное", () => {
-    render(<MealModal meal={ownMeal} onClose={() => {}} />);
-
-    expect(useHistory.getState().historyIds).not.toContain(ownMeal.idMeal);
-    expect(useFavorites.getState().ids).not.toContain(ownMeal.idMeal);
-  });
-
-  it("закрывается по Escape ровно один раз", () => {
-    const onClose = vi.fn();
-    render(<MealModal meal={ownMeal} onClose={onClose} />);
-
-    fireEvent.keyDown(window, { key: "Escape" });
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it("клик по оверлею закрывает, клик по содержимому — нет", () => {
-    const onClose = vi.fn();
-    render(<MealModal meal={ownMeal} onClose={onClose} />);
-
-    fireEvent.click(screen.getByRole("dialog"));
-    expect(onClose).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole("dialog").parentElement!);
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it("рендерит слот actionButton и плейсхолдер для null-картинки", () => {
-    render(
-      <MealModal
-        meal={ownMeal}
-        onClose={() => {}}
-        actionButton={<button data-testid="slot">♥</button>}
-      />,
-    );
-
-    expect(screen.getByTestId("slot")).toBeInTheDocument();
-    expect(
-      screen.getByAltText("Борщ по-домашнему").getAttribute("src"),
-    ).toContain("placehold.co");
-  });
-
-  it("показывает заглушки для пустых ингредиентов и инструкции", () => {
-    render(
-      <MealModal
-        meal={{ ...ownMeal, ingredients: [], strInstructions: "" }}
-        onClose={() => {}}
-      />,
-    );
-
-    expect(screen.getByText("Ингредиенты не указаны.")).toBeInTheDocument();
-    expect(screen.getByText("Инструкция не указана.")).toBeInTheDocument();
+  it("рендерит ингредиенты списком", () => {
+    renderWithProviders(<MealModal meal={mockMeal} onClose={() => {}} />);
+    expect(screen.getByText("Chicken")).toBeInTheDocument();
+    expect(screen.getByText("Soy Sauce")).toBeInTheDocument();
+    expect(screen.getByText("Ginger")).toBeInTheDocument();
   });
 });

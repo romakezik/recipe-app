@@ -1,21 +1,33 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { useFavorites } from "../store/useFavoritesStore";
+import { useFavorites } from "../hooks/useFavorites";
 import MealModalLoader from "../components/MealModalLoader";
 import { MealCard } from "../components/MealCard";
 import { useMeals } from "../hooks/useMeals";
 
 export default function Favorites() {
-  const ids = useFavorites((s) => s.ids);
-  const toggle = useFavorites((s) => s.toggle);
+  const { ids, enabled, toggle, isPending, error, dismiss } = useFavorites();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { meals, isLoading, isAnyError } = useMeals(ids);
 
+  if (!enabled) {
+    return (
+      <div className="mx-auto mt-10 max-w-3xl p-6 text-center">
+        <h2 className="mb-4 text-2xl font-bold text-gray-700">
+          Избранное доступно после входа
+        </h2>
+        <Link to="/login" className="text-blue-500 hover:underline">
+          Войти
+        </Link>
+      </div>
+    );
+  }
+
   if (ids.length === 0) {
     return (
-      <div className="mx-auto max-w-3xl p-6 text-center mt-10">
-        <h2 className="text-2xl font-bold mb-4 text-gray-700">
+      <div className="mx-auto mt-10 max-w-3xl p-6 text-center">
+        <h2 className="mb-4 text-2xl font-bold text-gray-700">
           В избранном пока пусто
         </h2>
         <Link to="/" className="text-blue-500 hover:underline">
@@ -35,10 +47,26 @@ export default function Favorites() {
 
   return (
     <div className="mx-auto max-w-3xl p-6">
-      <h2 className="text-2xl font-bold mb-4 text-blue-500">Ваше избранное</h2>
+      <h2 className="mb-4 text-2xl font-bold text-blue-500">Ваше избранное</h2>
+
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 flex items-start gap-3 rounded-lg bg-red-100 p-3 text-red-700"
+        >
+          <span className="text-sm">{error}</span>
+          <button
+            type="button"
+            onClick={dismiss}
+            className="ml-auto cursor-pointer text-sm font-bold hover:underline"
+          >
+            Скрыть
+          </button>
+        </div>
+      )}
 
       {isAnyError && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+        <div className="mb-4 rounded-lg bg-red-100 p-3 text-red-700">
           Некоторые рецепты не удалось загрузить. Проверьте интернет и обновите
           страницу.
         </div>
@@ -52,8 +80,10 @@ export default function Favorites() {
             onOpen={setSelectedId}
             actionButton={
               <button
+                type="button"
                 onClick={() => toggle(m.idMeal)}
-                className="absolute top-2 right-2 bg-white/70 rounded-full w-7 h-7 flex items-center justify-center shadow text-red-500 hover:bg-gray-100/60 z-10"
+                disabled={isPending}
+                className="absolute top-2 right-2 z-10 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-white/70 text-red-500 shadow transition-colors hover:bg-gray-100/60 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Удалить из избранного"
               >
                 ✕
@@ -62,6 +92,7 @@ export default function Favorites() {
           />
         ))}
       </ul>
+
       {selectedId && (
         <MealModalLoader id={selectedId} onClose={() => setSelectedId(null)} />
       )}
