@@ -1,72 +1,78 @@
-import { render, screen } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
 import MealModal from "./MealModal";
+import type { Meal } from "../lib/meal";
+import { useHistory } from "../store/useHistoryStore";
 
-vi.mock("../hooks/useFavorites", () => ({
-  useFavorites: vi.fn(() => ({
-    ids: [],
-    enabled: true,
-    isFavorite: vi.fn(() => false),
-    toggle: vi.fn(),
-    isPending: false,
-    error: null,
-    dismiss: vi.fn(),
-  })),
-}));
-
-vi.mock("../store/useHistoryStore", () => ({
-  useHistory: vi.fn(() => ({
-    ids: [],
-    add: vi.fn(),
-  })),
-}));
-
-vi.mock("../hooks/useAuth", () => ({
-  useAuth: vi.fn(() => ({
-    user: { id: "test-user", email: "test@test.com" },
-    loading: false,
-    signOut: vi.fn(),
-    session: null,
-  })),
-}));
-
-const mockMeal = {
+const meal: Meal = {
   idMeal: "52772",
   strMeal: "Chicken Teriyaki",
+  strMealThumb: null,
   strCategory: "Chicken",
   strArea: "Japanese",
   strInstructions: "Cook the chicken and add sauce.",
-  strMealThumb:
-    "https://www.themealdb.com/images/media/meals/wvpsxx1468256321.jpg",
   ingredients: ["Chicken", "Soy Sauce", "Ginger"],
 };
 
-function renderWithProviders(ui: ReactNode) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
-  );
-}
+describe("MealModal — презентационная, без источников данных", () => {
+  it("рендерится без провайдеров и моков", () => {
+    render(<MealModal meal={meal} onClose={() => {}} />);
 
-describe("MealModal", () => {
-  beforeEach(() => vi.clearAllMocks());
-
-  it("рендерит информацию о блюде", () => {
-    renderWithProviders(<MealModal meal={mockMeal} onClose={() => {}} />);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("Chicken Teriyaki")).toBeInTheDocument();
-    expect(screen.getByText("Ингредиенты:")).toBeInTheDocument();
-    expect(screen.getByText("Инструкция:")).toBeInTheDocument();
-    expect(screen.getByAltText("Chicken Teriyaki")).toBeInTheDocument();
+    expect(screen.getByText("Soy Sauce")).toBeInTheDocument();
   });
 
-  it("рендерит ингредиенты списком", () => {
-    renderWithProviders(<MealModal meal={mockMeal} onClose={() => {}} />);
-    expect(screen.getByText("Chicken")).toBeInTheDocument();
-    expect(screen.getByText("Soy Sauce")).toBeInTheDocument();
-    expect(screen.getByText("Ginger")).toBeInTheDocument();
+  it("не пишет id рецепта в историю", () => {
+    useHistory.setState({ historyIds: [] });
+    render(<MealModal meal={meal} onClose={() => {}} />);
+
+    expect(useHistory.getState().historyIds).not.toContain(meal.idMeal);
+  });
+
+  it("закрывается по Escape ровно один раз", () => {
+    const onClose = vi.fn();
+    render(<MealModal meal={meal} onClose={onClose} />);
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("клик по оверлею закрывает, по содержимому — нет", () => {
+    const onClose = vi.fn();
+    render(<MealModal meal={meal} onClose={onClose} />);
+
+    fireEvent.click(screen.getByRole("dialog"));
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("dialog").parentElement!);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("рендерит слот actionButton и плейсхолдер для null-картинки", () => {
+    render(
+      <MealModal
+        meal={meal}
+        onClose={() => {}}
+        actionButton={<button data-testid="slot">♥</button>}
+      />,
+    );
+
+    expect(screen.getByTestId("slot")).toBeInTheDocument();
+    expect(
+      screen.getByAltText("Chicken Teriyaki").getAttribute("src"),
+    ).toContain("placehold.co");
+  });
+
+  it("показывает заглушки для пустых ингредиентов и инструкции", () => {
+    render(
+      <MealModal
+        meal={{ ...meal, ingredients: [], strInstructions: "" }}
+        onClose={() => {}}
+      />,
+    );
+
+    expect(screen.getByText("Ингредиенты не указаны.")).toBeInTheDocument();
+    expect(screen.getByText("Инструкция не указана.")).toBeInTheDocument();
   });
 });
